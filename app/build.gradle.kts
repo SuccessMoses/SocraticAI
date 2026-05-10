@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.objectbox)
 }
 
 android {
@@ -61,6 +63,9 @@ dependencies {
     // LiteRT-LM (includes LiteRT runtime)
     implementation(libs.litertlm.android)
     implementation(libs.mediapipe.tasks.genai)
+
+    // ObjectBox for Local RAG
+    implementation(libs.objectbox.kotlin)
 
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))

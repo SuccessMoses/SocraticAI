@@ -72,6 +72,16 @@ fun SocraticChatScreen(
                 Text(text = "Error: ${uiState.message}", color = MaterialTheme.colorScheme.error)
             }
             else -> {
+                if (uiState is UiState.Thinking) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    ) {
+                        CircularProgressIndicator(modifier = Modifier.size(48.dp))
+                        Text(text = uiState.step, style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+
                 TextField(
                     value = text,
                     onValueChange = { text = it },
@@ -80,7 +90,10 @@ fun SocraticChatScreen(
                 )
                 
                 if (uiState is UiState.Responding) {
-                    Text(text = uiState.text, modifier = Modifier.weight(1f))
+                    Text(
+                        text = uiState.text, 
+                        modifier = Modifier.weight(1f).padding(top = 16.dp)
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -89,11 +102,7 @@ fun SocraticChatScreen(
                     onClick = { onAsk(text) },
                     enabled = uiState is UiState.Ready || uiState is UiState.Responding
                 ) {
-                    if (uiState is UiState.Thinking) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                    } else {
-                        Text("Ask SocraticAI")
-                    }
+                    Text("Ask SocraticAI")
                 }
             }
         }
