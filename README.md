@@ -12,10 +12,8 @@ Standard AI chatbots often hinder learning by providing immediate answers. Socra
 2.  **Scaffold Learning**: Break complex problems into manageable sub-concepts.
 3.  **Guide via Inquiry**: Ask insightful, grounded questions that lead the student to the next logical step.
 
-## 🏗️ Architecture: Grounded in Open-Notebook
-The framework's "Agentic DNA" is directly migrated from the [lfnovo/open-notebook](https://github.com/lfnovo/open-notebook) project, adapted for the constraints and opportunities of mobile hardware.
-
-*   **Socratic State Machine**: A Kotlin-native orchestrator that manages the tutoring loop (`INIT` -> `CONTEXT_CHECK` -> `GENERATE_GUIDE` -> `EVALUATE`), mirroring the LangGraph workflows of proven agentic systems.
+## 🏗️ Architecture:
+*   **Socratic State Machine**: A Kotlin-native orchestrator that manages the tutoring loop (`INIT` -> `CONTEXT_CHECK` -> `GENERATE_GUIDE` -> `EVALUATE`).
 *   **Optimistic Map-Reduce**: A sophisticated context management algorithm that allows the model to "read" large textbooks or handwritten notebooks by chunking and synthesizing data locally.
 *   **Agentic RAG & Artifacts**: Every AI-generated question is an "Artifact" linked via a graph relationship back to its original source in the student's study materials, ensuring high-integrity grounding and provenance.
 

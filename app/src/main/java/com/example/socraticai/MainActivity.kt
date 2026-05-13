@@ -2,16 +2,24 @@ package com.example.socraticai
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -43,6 +51,7 @@ class MainActivity : ComponentActivity() {
                     SocraticChatScreen(
                         uiState = uiState,
                         onAsk = { viewModel.askQuestion(it) },
+                        onPickDocument = { viewModel.ingestDocument(it) },
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
@@ -55,9 +64,16 @@ class MainActivity : ComponentActivity() {
 fun SocraticChatScreen(
     uiState: UiState,
     onAsk: (String) -> Unit,
+    onPickDocument: (android.net.Uri) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var text by remember { mutableStateOf("") }
+    
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri ->
+        uri?.let { onPickDocument(it) }
+    }
 
     Column(
         modifier = modifier.fillMaxSize().padding(16.dp),
@@ -86,7 +102,7 @@ fun SocraticChatScreen(
                     value = text,
                     onValueChange = { text = it },
                     label = { Text("Ask a question...") },
-                    modifier = Modifier.fillMaxSize().weight(1f)
+                    modifier = Modifier.fillMaxWidth().weight(1f)
                 )
                 
                 if (uiState is UiState.Responding) {
@@ -98,11 +114,20 @@ fun SocraticChatScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Button(
-                    onClick = { onAsk(text) },
-                    enabled = uiState is UiState.Ready || uiState is UiState.Responding
-                ) {
-                    Text("Ask SocraticAI")
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = { launcher.launch("*/*") }) {
+                        Icon(Icons.Default.Add, contentDescription = "Upload Notes")
+                    }
+                    
+                    Spacer(modifier = Modifier.size(8.dp))
+
+                    Button(
+                        onClick = { onAsk(text) },
+                        enabled = uiState is UiState.Ready || uiState is UiState.Responding,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text("Ask SocraticAI")
+                    }
                 }
             }
         }

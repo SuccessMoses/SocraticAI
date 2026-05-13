@@ -1,13 +1,10 @@
 package com.example.socraticai.ui
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.socraticai.ai.GemmaLiteRTClient
-import com.example.socraticai.ai.ModelRouter
-import com.example.socraticai.ai.PromptRenderer
-import com.example.socraticai.ai.SocraticOrchestrator
-import com.example.socraticai.ai.SocraticState
+import com.example.socraticai.ai.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,6 +17,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     private var socraticOrchestrator: SocraticOrchestrator? = null
+    private var sourceIngestor: SourceIngestor? = null
 
     init {
         initializeAgent()
@@ -33,19 +31,35 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val gemma4Path = File(filesDir, "gemma_4b.litertlm").absolutePath
             val gemmaTinyPath = File(filesDir, "gemma_270m.litertlm").absolutePath
             
-            // Deep reasoning model
             val deepClient = GemmaLiteRTClient(getApplication(), gemma4Path)
             deepClient.initialize()
             
-            // Fast intent model
             val fastClient = GemmaLiteRTClient(getApplication(), gemmaTinyPath)
             fastClient.initialize()
+            
+            val visionClient = GemmaVisionClient(getApplication(), gemma4Path)
+            visionClient.initialize()
             
             val router = ModelRouter(fastClient = fastClient, deepClient = deepClient)
             val renderer = PromptRenderer(getApplication())
             
             socraticOrchestrator = SocraticOrchestrator(router, renderer)
             
+            sourceIngestor = SourceIngestor(
+                getApplication(), 
+                visionClient, 
+                VectorSearchManager()
+            )
+            
+            _uiState.value = UiState.Ready
+        }
+    }
+
+    fun ingestDocument(uri: Uri) {
+        val ingestor = sourceIngestor ?: return
+        viewModelScope.launch {
+            _uiState.value = UiState.Thinking("Analyzing your materials...")
+            ingestor.ingest(uri)
             _uiState.value = UiState.Ready
         }
     }
